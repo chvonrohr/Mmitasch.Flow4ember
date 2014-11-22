@@ -28,8 +28,9 @@ class EpfView extends \TYPO3\Flow\Mvc\View\AbstractView implements EmberViewInte
 		$this->controllerContext->getResponse()->setHeader('Content-Type', 'application/json'); // TODO: uncomment
 		$isCollection = (isset($this->variables['isCollection']) && $this->variables['isCollection'] === TRUE);
 		$clientId = (isset($this->variables['clientId'])) ? $this->variables['clientId'] : NULL;
-		
-		return $this->serializer->serialize($this->variables['content'], $isCollection, $clientId);
+		$resultMeta = (isset($this->variables['resultMeta'])) ? $this->variables['resultMeta'] : array();
+
+		return $this->serializer->serialize($this->variables['content'], $isCollection, $clientId, $resultMeta);
 	}
 	
 	/**

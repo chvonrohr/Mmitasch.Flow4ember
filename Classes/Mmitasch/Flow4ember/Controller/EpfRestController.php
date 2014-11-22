@@ -333,7 +333,46 @@ class EpfRestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 				}
 			}
 		} else {
-			$models = $this->metaModel->getRepository()->findAll()->toArray();
+			
+			// TODO: get default query object for additional filtering
+			// https://blog.apigee.com/detail/restful_api_design_can_your_api_give_developers_just_the_information
+			$modelsQuery = $this->metaModel->getRepository()->findAll()->getQuery();
+			
+			// TODO: filter ???
+			// xxx=aldkfjdfkdf
+
+			// after filtering, count all objects before limiting query
+			$meta['total'] = $modelsQuery->count();
+
+			// TODO: fields
+
+			// limit
+			if (array_key_exists('limit', $arguments)) {
+				$modelsQuery->setLimit( (int) $arguments['limit']);
+				$meta['limit'] = (int) $arguments['limit'];
+			}
+
+			// offset
+			if (array_key_exists('offset', $arguments)) {
+				$modelsQuery->setOffset( (int) $arguments['offset']);
+			}
+
+			// sort ("-" prefix = descending)
+			if (array_key_exists('sort', $arguments) && !empty($arguments['sort'])) {
+				$sort = $arguments['sort'];
+				$sortDirection = \TYPO3\Flow\Persistence\QueryInterface::ORDER_ASCENDING;
+
+				if (substr($sort, 0, 1) === '-') {
+					$sort = substr($sort, 1);
+					$sortDirection = \TYPO3\Flow\Persistence\QueryInterface::ORDER_DESCENDING;
+				}
+				
+				$modelsQuery->setOrderings(array($sort => $sortDirection));
+			}
+
+			// fetch to array
+			$models = $modelsQuery->execute()->toArray();
+
 		}
 		
 		$x=\TYPO3\Flow\var_dump($models, '', TRUE, TRUE);

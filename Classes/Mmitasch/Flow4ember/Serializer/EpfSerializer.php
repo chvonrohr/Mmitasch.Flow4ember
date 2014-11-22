@@ -66,9 +66,10 @@ class EpfSerializer implements SerializerInterface {
 	 * @param mixed $objects Passed objects (can be array of objects or single object)
 	 * @param boolean $isCollection
 	 * @param string $clientId
+	 * @param array $resultMeta
 	 * @return type
 	 */
-	public function serialize ($objects, $isCollection, $clientId) {
+	public function serialize ($objects, $isCollection, $clientId, $resultMeta = array()) {
 		$result = array();
 		if (empty($objects)) {
 			return json_encode((object) $result);
@@ -79,6 +80,10 @@ class EpfSerializer implements SerializerInterface {
 		if ($isCollection) {
 			$resourceName = $metaModel->getResourceName();
 			$result[$resourceName] = $this->serializeCollection($objects, $metaModel);
+
+			// meta: http://emberjs.com/guides/models/handling-metadata/
+			$result['meta'] = $resultMeta;
+
 		} else {
 			$resourceNameSingular = $metaModel->getResourceNameSingular();
 			$result[$resourceNameSingular] = $this->serializeObject($objects, $metaModel);
@@ -87,7 +92,8 @@ class EpfSerializer implements SerializerInterface {
 				$result[$resourceNameSingular]['client_id'] = $clientId;
 			}
 		}
-		
+
+
 		if (!empty($this->sideloadObjects)) {
 			foreach ($this->sideloadObjects as $flowModelName => $objects) {
 				$associationMetaModel = $this->findByFlowModelName($flowModelName);

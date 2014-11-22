@@ -63,7 +63,7 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 		
 			// add/override each model that is configured in Ember.yaml
 		foreach ($this->config as $packageNamespace => $packagesConfigs) {
-			foreach ($packagesConfigs as $packageName => $packageConfig) {
+            foreach ($packagesConfigs as $packageName => $packageConfig) {
 				if(isset($packageConfig['models'])) {
 					foreach ($packageConfig['models'] as $modelName => $modelConfig) {
 						$packageKey = $packageNamespace . '.' . $packageName;
@@ -72,7 +72,7 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 				}
 			}
 		}
-		
+        
 			// set emberModelType on association (after all models are loaded)
 		foreach ($this->metaModels as $packageKey => $metaModels) {
 			foreach ($metaModels as $metaModel) {

@@ -2,6 +2,21 @@
 TYPO3 Flow meets Ember.js
 *************************
 
+
+FORK
+=======
+**Attention: This Fork is experimental.**
+
+Objective of this fork is to implement additional methods to load only selective data (limit, offset, filtering).
+Use Ember 1.7.x as query-params (http://emberjs.com/guides/routing/query-params/) is buggy in older versions.
+
+For pagination a good library is https://github.com/knownasilya/pagination-pager
+
+
+
+Original Readme.md:
+=================
+
 This package provides an easy way to implement a web application that uses TYPO3 Flow (php framework) as your server backend and Ember.js as your frontend. It mainly provides you with two major features:
 
 * Super fast way to create a REST API (that complies to Ember conventions)
