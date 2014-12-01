@@ -286,9 +286,9 @@ class EpfSerializer implements SerializerInterface {
 	 */
 	protected function getPayloadName ($name, $type='') {
 		if ($type === 'belongsTo') {
-			return NamingUtility::decamelize($name) . '_id';
+			return NamingUtility::decamelize($name);// . '_id'; => fails with that !!!
 		} elseif ($type === 'hasMany') {
-			return NamingUtility::singularize(NamingUtility::decamelize($name)) . '_ids';
+			return NamingUtility::singularize(NamingUtility::decamelize($name));// . '_ids'; // ??
 		}
 		return NamingUtility::decamelize($name);
 	}
