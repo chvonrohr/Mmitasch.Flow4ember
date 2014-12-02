@@ -55,8 +55,6 @@ class EpfSerializer implements SerializerInterface {
 	 */
 	function __construct($metaModels) {
 		$this->metaModels = $metaModels;
-		
-//		\TYPO3\Flow\var_dump($metaModels);
 	}
 
 
@@ -98,15 +96,18 @@ class EpfSerializer implements SerializerInterface {
 			foreach ($this->sideloadObjects as $flowModelName => $objects) {
 				$associationMetaModel = $this->findByFlowModelName($flowModelName);
 				$associationResourceName = $associationMetaModel->getResourceName();
-				
+
 				if (is_array($objects)) {
 					foreach ($objects as $object) {
-						$result[$associationResourceName][] = $this->serializeObject($object, $associationMetaModel);
+						$objectId = $this->persistenceManager->getIdentifierByObject($object);
+						$result[$associationResourceName][$objectId] = $this->serializeObject($object, $associationMetaModel);
 					}
 				} else {
-					$result[$associationResourceName][] = $this->serializeObject($objects, $associationMetaModel);
+					$objectId = $this->persistenceManager->getIdentifierByObject($objects);
+					$result[$associationResourceName][$objectId] = $this->serializeObject($objects, $associationMetaModel);
 				}
-				
+
+				sort($result[$associationResourceName]); // unset uuid-keys!
 				
 			}
 		}

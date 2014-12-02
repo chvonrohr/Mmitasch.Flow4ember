@@ -8,8 +8,8 @@ namespace Mmitasch\Flow4ember\Service;
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow,
-		Mmitasch\Flow4ember\Domain\Model\Metamodel,
-		Mmitasch\Flow4ember\Utility\NamingUtility;
+	Mmitasch\Flow4ember\Domain\Model\Metamodel,
+	Mmitasch\Flow4ember\Utility\NamingUtility;
 
 /**
  * @Flow\Scope("singleton")
@@ -60,7 +60,7 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 		$resources = $this->reflectionService->getClassNamesByAnnotation('\Mmitasch\Flow4ember\Annotations\Resource');
 			// add each model that has an Ember.Resource Annotation
 		$this->addMetaModels($resources);
-		
+		//\TYPO3\Flow\var_dump($models);
 			// add/override each model that is configured in Ember.yaml
 		foreach ($this->config as $packageNamespace => $packagesConfigs) {
             foreach ($packagesConfigs as $packageName => $packageConfig) {
@@ -77,7 +77,7 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 		foreach ($this->metaModels as $packageKey => $metaModels) {
 			foreach ($metaModels as $metaModel) {
 				if (is_array($metaModel->getAssociations())) {
-					foreach ($metaModel->getAssociations()as $association) {
+					foreach ($metaModel->getAssociations() as $association) {
 						$targetFlowModelName = $association->getFlowModelName();
 						$targetMetaModel = $this->findByFlowModelName($targetFlowModelName, $packageKey);
 						$association->setMetaModel($targetMetaModel);
@@ -86,7 +86,7 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 			}
 		}
 		
-//		$this->dumpModels(); // TODO: remove
+		//$this->dumpModels(); // TODO: remove
 	}
 	
 	
