@@ -160,6 +160,8 @@ class EpfSerializer implements SerializerInterface {
 		}
 		
 			// add associations
+		//\TYPO3\Flow\var_dump($metaModel->getAssociations());
+		//die();
 		foreach ((array) $metaModel->getAssociations() as $association) {
 			$getterName = 'get' . ucfirst($association->getFlowName());
 			$associatedObjects = $object->$getterName();
@@ -286,6 +288,8 @@ class EpfSerializer implements SerializerInterface {
 	 * @return string
 	 */
 	protected function getPayloadName ($name, $type='') {
+		return $name; //NamingUtility::decamelize($name); // changed anytime ??
+
 		if ($type === 'belongsTo') {
 			return NamingUtility::decamelize($name);// . '_id'; => fails with that !!!
 		} elseif ($type === 'hasMany') {
