@@ -95,6 +95,10 @@ class EpfSerializer implements SerializerInterface {
 			}
 		}
 
+		// sideload options
+		if (!array_key_exists('sideload', $options)) {
+			$options['sideload'] = array();
+		}
 
 		if (!empty($this->sideloadObjects)) {
 			foreach ($this->sideloadObjects as $flowModelName => $objects) {
