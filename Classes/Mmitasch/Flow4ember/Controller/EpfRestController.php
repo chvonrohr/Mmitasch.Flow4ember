@@ -334,7 +334,7 @@ class EpfRestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 			}
 		} else {
 			
-			// TODO: get default query object for additional filtering
+			// get default query object for additional filtering
 			// https://blog.apigee.com/detail/restful_api_design_can_your_api_give_developers_just_the_information
 			$modelsQuery = $this->metaModel->getRepository()->findAll()->getQuery();
 			

@@ -25,12 +25,13 @@ class EpfView extends \TYPO3\Flow\Mvc\View\AbstractView implements EmberViewInte
 	 * @return string The JSON encoded variables
 	 */
 	public function render() {
-		$this->controllerContext->getResponse()->setHeader('Content-Type', 'application/json'); // TODO: uncomment
+		$this->controllerContext->getResponse()->setHeader('Content-Type', 'application/json');
 		$isCollection = (isset($this->variables['isCollection']) && $this->variables['isCollection'] === TRUE);
 		$clientId = (isset($this->variables['clientId'])) ? $this->variables['clientId'] : NULL;
 		$resultMeta = (isset($this->variables['resultMeta'])) ? $this->variables['resultMeta'] : array();
+		$options = (isset($this->variables['options'])) ? $this->variables['options'] : array();
 
-		return $this->serializer->serialize($this->variables['content'], $isCollection, $clientId, $resultMeta);
+		return $this->serializer->serialize($this->variables['content'], $isCollection, $clientId, $resultMeta, $options);
 	}
 	
 	/**

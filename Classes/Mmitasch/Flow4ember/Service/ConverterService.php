@@ -54,7 +54,9 @@ class ConverterService {
 				function ($value) { return ($value) ? "true" : "false"; }, 
 				function($value) { return $value; /* leave type conversion to flow type converter */ });
 		$this->standardConverters['date'] = new TypeConverter('DateTime', 'date', 
-				function ($value) { return $value->format(\DateTime::ISO8601); /* ISO8601 is the preferred format for serializing date in json*/}, 
+				function ($value) { 
+					if (!$value) return '';
+					return $value->format(\DateTime::ISO8601); /* ISO8601 is the preferred format for serializing date in json*/}, 
 				function($value) { 
 					return array('date' => $value, 'dateFormat' => "D, d M Y H:i:s T"); // setup for flow type converter
 				});

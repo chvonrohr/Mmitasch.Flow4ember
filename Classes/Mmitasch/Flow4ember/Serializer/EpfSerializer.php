@@ -67,20 +67,24 @@ class EpfSerializer implements SerializerInterface {
 	 * @param array $resultMeta
 	 * @return type
 	 */
-	public function serialize ($objects, $isCollection, $clientId, $resultMeta = array()) {
+	public function serialize ($objects, $isCollection, $clientId, $resultMeta = array(), $options = array()) {
 		$result = array();
+
+		// meta: http://emberjs.com/guides/models/handling-metadata/
+		$result['meta'] = $resultMeta;
+
 		if (empty($objects)) {
+			$result[ $options['model'] ] = array();
 			return json_encode((object) $result);
 		}
+
 		$flowModelName = is_array($objects) ? get_class($objects[0]) : get_class($objects);
 		$metaModel = $this->findByFlowModelName($flowModelName);
-		
+
+
 		if ($isCollection) {
 			$resourceName = $metaModel->getResourceName();
 			$result[$resourceName] = $this->serializeCollection($objects, $metaModel);
-
-			// meta: http://emberjs.com/guides/models/handling-metadata/
-			$result['meta'] = $resultMeta;
 
 		} else {
 			$resourceNameSingular = $metaModel->getResourceNameSingular();
@@ -94,21 +98,25 @@ class EpfSerializer implements SerializerInterface {
 
 		if (!empty($this->sideloadObjects)) {
 			foreach ($this->sideloadObjects as $flowModelName => $objects) {
-				$associationMetaModel = $this->findByFlowModelName($flowModelName);
-				$associationResourceName = $associationMetaModel->getResourceName();
 
-				if (is_array($objects)) {
-					foreach ($objects as $object) {
-						$objectId = $this->persistenceManager->getIdentifierByObject($object);
-						$result[$associationResourceName][$objectId] = $this->serializeObject($object, $associationMetaModel);
+				// check if option set in sideload-request !
+				$modelShortName = lcfirst( substr($flowModelName, strrpos($flowModelName, '\\')+1) );
+				if ($options['sideload'] == 'all' || in_array($modelShortName, $options['sideload'])) {
+					$associationMetaModel = $this->findByFlowModelName($flowModelName);
+					$associationResourceName = $associationMetaModel->getResourceName();
+
+					if (is_array($objects)) {
+						foreach ($objects as $object) {
+							$objectId = $this->persistenceManager->getIdentifierByObject($object);
+							$result[$associationResourceName][$objectId] = $this->serializeObject($object, $associationMetaModel);
+						}
+					} else {
+						$objectId = $this->persistenceManager->getIdentifierByObject($objects);
+						$result[$associationResourceName][$objectId] = $this->serializeObject($objects, $associationMetaModel);
 					}
-				} else {
-					$objectId = $this->persistenceManager->getIdentifierByObject($objects);
-					$result[$associationResourceName][$objectId] = $this->serializeObject($objects, $associationMetaModel);
-				}
 
-				sort($result[$associationResourceName]); // unset uuid-keys!
-				
+					sort($result[$associationResourceName]); // unset uuid-keys!
+				}
 			}
 		}
 		
@@ -286,6 +294,8 @@ class EpfSerializer implements SerializerInterface {
 	 * @return string
 	 */
 	protected function getPayloadName ($name, $type='') {
+		return $name; //NamingUtility::decamelize($name); // changed anytime ??
+		
 		if ($type === 'belongsTo') {
 			return NamingUtility::decamelize($name);// . '_id'; => fails with that !!!
 		} elseif ($type === 'hasMany') {
