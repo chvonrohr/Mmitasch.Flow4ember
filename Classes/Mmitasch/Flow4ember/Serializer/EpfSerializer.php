@@ -251,10 +251,18 @@ class EpfSerializer implements SerializerInterface {
 		// Add properties
 		foreach ((array) $metaModel->getProperties() as $property) {
 			$propertyPayloadName = $this->getPayloadName($property->getName());
-
+			//\TYPO3\Flow\var_dump($propertyPayloadName);
+			//\TYPO3\Flow\var_dump($data);
 			if (array_key_exists($propertyPayloadName, $data)) {
 				$convertTo = $property->getConverter()->getTo();
 				$result[$property->getName()] = $convertTo($data[$propertyPayloadName]);
+				// TODO cleanup
+				if ($property->getName() == 'birthday') {
+					//\TYPO3\Flow\var_dump($property, "property");
+					//\TYPO3\Flow\var_dump(get_class($property), 'type property');
+					//\TYPO3\Flow\var_dump($property->getConverter(), 'type converter');
+					//\TYPO3\Flow\var_dump($result[$property->getName()], 'result');
+				}
 			}
 		}
 		
