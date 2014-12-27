@@ -61,6 +61,8 @@ class ConverterService {
 					if (!$value) return NULL;
 					$newDate = (new \DateTime($value))->format(\DateTime::ISO8601);
 					return array('date' => $newDate, 'dateFormat' => \DateTime::ISO8601); // setup for flow type converter
+					if (!$value) return null;
+					return $value->format(\DateTime::ISO8601); /* ISO8601 is the preferred format for serializing date in json*/
 				});
 	}
 	
