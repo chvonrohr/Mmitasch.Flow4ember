@@ -161,15 +161,15 @@ class EpfSerializer implements SerializerInterface {
 			$value = $convertFrom($object->$getterName());
 			
 				// only include in result if has value
+			$propertyPayloadName = $this->getPayloadName($property->getName());
 			if (isset($value)) {
-				$propertyPayloadName = $this->getPayloadName($property->getName());
 				$result[$propertyPayloadName] = $value; 
+			} else {
+				$result[$propertyPayloadName] = NULL; 
 			}
 		}
 		
 			// add associations
-		//\TYPO3\Flow\var_dump($metaModel->getAssociations());
-		//die();
 		foreach ((array) $metaModel->getAssociations() as $association) {
 			$getterName = 'get' . ucfirst($association->getFlowName());
 			$associatedObjects = $object->$getterName();
@@ -238,7 +238,7 @@ class EpfSerializer implements SerializerInterface {
 	 */
 	public function deserialize ($data, $metaModel) {
 		$result = array();
-			$this->systemLogger->log("Data: " . print_r($data, TRUE), LOG_INFO); // TODO remove
+		//$this->systemLogger->log("Data: " . print_r($data, TRUE), LOG_INFO); // TODO remove
 
 		if (array_key_exists('id', $data)) {
 			$result['__identity'] = $data['id'];
@@ -257,20 +257,20 @@ class EpfSerializer implements SerializerInterface {
 		// Add associations
 		foreach ((array) $metaModel->getAssociations() as $association) {
 			$associationPayloadName = $this->getPayloadName($association->getEmberName(), $association->getEmberType());
-			$this->systemLogger->log("Association: " . $association->getEmberName() . "; PayloadName: " . $associationPayloadName . "; Type: " . $association->getEmberType(), LOG_INFO);
-			$this->systemLogger->log("Payload name: " . $associationPayloadName, LOG_INFO); // TODO remove
+			//$this->systemLogger->log("Association: " . $association->getEmberName() . "; PayloadName: " . $associationPayloadName . "; Type: " . $association->getEmberType(), LOG_INFO);
+			//$this->systemLogger->log("Payload name: " . $associationPayloadName, LOG_INFO); // TODO remove
 			
 			if(isset($data[$associationPayloadName]) && $data[$associationPayloadName] !== NULL) {
 				$result[$association->getFlowName()] = $data[$associationPayloadName];
 			}
 		}
-
+		/*
 		// TODO remove Logging
 		ob_start();
 		var_dump($result);
 		$x = ob_get_clean();
 		$this->systemLogger->log("Result: " .$x, LOG_INFO);
-
+		*/
 		
 		return $result;
 	}

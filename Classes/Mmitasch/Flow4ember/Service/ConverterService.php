@@ -55,10 +55,12 @@ class ConverterService {
 				function($value) { return $value; /* leave type conversion to flow type converter */ });
 		$this->standardConverters['date'] = new TypeConverter('DateTime', 'date', 
 				function ($value) { 
-					if (!$value) return '';
+					if (!$value || empty($value)) return NULL;
 					return $value->format(\DateTime::ISO8601); /* ISO8601 is the preferred format for serializing date in json*/}, 
 				function($value) { 
-					return array('date' => $value, 'dateFormat' => "D, d M Y H:i:s T"); // setup for flow type converter
+					if (!$value) return NULL;
+					$newDate = (new \DateTime($value))->format(\DateTime::ISO8601);
+					return array('date' => $newDate, 'dateFormat' => \DateTime::ISO8601); // setup for flow type converter
 				});
 	}
 	
