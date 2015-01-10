@@ -73,19 +73,26 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 			}
 		}
         
+			// resource as standard metamodel (file relations can be lazy-loaded)
+		$this->setMetaModel(new Metamodel('TYPO3\Flow\Resource\Resource', $packageKey));	
+		$this->setMetaModel(new Metamodel('TYPO3\Flow\Resource\ResourcePointer', $packageKey));	
+		//$this->metaModels[$packageKey][$flowModelName]
+		
+		
 			// set emberModelType on association (after all models are loaded)
 		foreach ($this->metaModels as $packageKey => $metaModels) {
 			foreach ($metaModels as $metaModel) {
 				if (is_array($metaModel->getAssociations())) {
 					foreach ($metaModel->getAssociations() as $association) {
 						$targetFlowModelName = $association->getFlowModelName();
+						if (stristr($targetFlowModelName, 'TYPO3\Flow\Resource')) continue;
 						$targetMetaModel = $this->findByFlowModelName($targetFlowModelName, $packageKey);
 						$association->setMetaModel($targetMetaModel);
 					}
 				}
 			}
 		}
-		
+
 		//$this->dumpModels(); // TODO: remove
 	}
 	
@@ -111,8 +118,9 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 	 * @return \Mmitasch\Flow4ember\Domain\Model\Metamodel
 	 */
 	public function findByFlowModelName($flowModelName, $packageKey) {
+		//\TYPO3\Flow\var_dump($this->metaModels);
 		if (!isset($this->metaModels[$packageKey][$flowModelName])) {
-			throw new \RuntimeException('Could not find Metamodel for class: ' . $flowModelName . '.', 1375148357); 
+			throw new \RuntimeException('Could not find Metamodel for class: ' . $flowModelName . '(' . $packageKey . ').', 1375148357); 
 		}
 		return $this->metaModels[$packageKey][$flowModelName];
 	}
@@ -134,7 +142,7 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 			if ($metaModel->getResourceName() === $resourceName) return $metaModel;
 		}
 		
-		throw new \RuntimeException('Could not find Metamodel for resourceName: ' . $resourceName . '.', 1375148356); 
+		throw new \RuntimeException('Could not find Metamodel for resourceName: ' . $resourceName . '(' . $packageKey . ').', 1375148356); 
 	}
 	
 	/**
