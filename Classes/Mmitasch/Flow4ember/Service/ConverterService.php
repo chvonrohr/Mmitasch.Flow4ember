@@ -77,6 +77,9 @@ class ConverterService {
 	 */
 	public function getTypeConverter($flowType, $emberType) {
 		
+		if (stristr($flowType, 'TYPO3\Flow\Resource'))
+			return;
+
 			// search custom converters
 		foreach ((array)$this->converters as $key => $converter) {
 			if ($converter->getFlowType() === $flowType && $converter->getEmberType() === $emberType) return $converter;
