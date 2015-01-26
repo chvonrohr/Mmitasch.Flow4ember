@@ -31,6 +31,11 @@ class EpfView extends \TYPO3\Flow\Mvc\View\AbstractView implements EmberViewInte
 		$resultMeta = (isset($this->variables['resultMeta'])) ? $this->variables['resultMeta'] : array();
 		$options = (isset($this->variables['options'])) ? $this->variables['options'] : array();
 
+		// on form error
+		if (array_key_exists('errors', $this->variables) && $this->variables['errors']) { //errors
+			return json_encode($this->variables['errors']);
+		}
+
 		return $this->serializer->serialize($this->variables['content'], $isCollection, $clientId, $resultMeta, $options);
 	}
 	

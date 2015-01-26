@@ -413,12 +413,24 @@ class EpfRestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 *
 	 * @param object $model The task to update
 	 * @return void
+	 * @Flow\IgnoreValidation("$model")
 	 */
 	public function updateAction($model) {
-		$this->metaModel->getRepository()->update($model);
-		$this->persistenceManager->persistAll(); 
+		//validate
+		$errors = $this->getValidationErrors($model);
 		
-		$this->response->setStatus(200);
+		// dont save - send errors
+		if ($errors) {
+			$this->response->setStatus(422); // 422 Unprocessable Entity
+			$this->view->assign('errors', $errors);
+		}
+		// ok: save and respond
+		else {
+			$this->metaModel->getRepository()->update($model);
+			$this->persistenceManager->persistAll();
+			$this->response->setStatus(200);
+		}
+
 		$this->view->assign('content', $model);
 	}
 
@@ -440,7 +452,37 @@ class EpfRestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		}
 		return '';
 	}
-	
+
+	/**
+	 * Manually validate model and return errors for json-response
+	 *
+	 * @param  object  $model model to validate
+	 * @return array        errors or NULL if valid
+	 */
+	public function getValidationErrors( $model ) {
+
+		// validate manually
+		$className = $this->metaModel->getFlowName();
+		$validator = $this->objectManager->get('TYPO3\\Flow\\Validation\\ValidatorResolver')->getBaseValidatorConjunction($className);
+		$result = $validator->validate($model);
+
+		// create error-result format for json encoding
+		if ($result->hasErrors()){
+			$errors = array();
+			$flattenedErrors = $result->getFlattenedErrors();
+			foreach ($flattenedErrors as $field => $errorResults) {
+				$errors[ $field ] = array();
+				foreach ($errorResults as $errorResult) {
+					$errors[ $field ][] = $errorResult->getMessage();
+				}
+			}
+
+			return array('errors' => $errors);
+		}
+
+		return NULL;
+	}
+
 	/**
 	 * Detect the supported request methods for a single order and set the "Allow" header accordingly (This is invoked on OPTION requests)
 	 *
