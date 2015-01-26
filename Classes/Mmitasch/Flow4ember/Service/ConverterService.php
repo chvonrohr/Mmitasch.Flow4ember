@@ -77,7 +77,7 @@ class ConverterService {
 	 */
 	public function getTypeConverter($flowType, $emberType) {
 		
-		if (stristr($flowType, 'TYPO3\Flow\Resource'))
+		if (stristr($flowType, 'TYPO3\Flow\Resource') || stristr($flowType, 'TYPO3\Media'))
 			return;
 
 			// search custom converters

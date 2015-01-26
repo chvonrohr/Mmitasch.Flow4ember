@@ -160,6 +160,12 @@ class EpfSerializer implements SerializerInterface {
 		
 			// add properties with values
 		foreach ((array) $metaModel->getProperties() as $property) {
+
+			// if no converter (TODO clean this - just if no converter or is inject-object given !! media, resourcepublisher...)
+			if (!$property || !$property->getConverter()) {
+				continue;
+			}
+
 			$convertFrom = $property->getConverter()->getFrom();
 			$getterName = 'get' . ucfirst($property->getName());
 			$value = $convertFrom($object->$getterName());
@@ -199,8 +205,16 @@ class EpfSerializer implements SerializerInterface {
 	protected function serializeAssociation($objects, Association $association) {
 		$result = array();
 		$associationFlowModelName = $association->getFlowModelName();
+
+
+		// resource+special
+		if (stristr($associationFlowModelName, 'TYPO3\\Media')) {
+			return $this->persistenceManager->getIdentifierByObject($objects);
+		}
+
 		$associationMetaModel = $this->findByFlowModelName($associationFlowModelName);
 		
+
 		if ($association->getIsCollection()) {
 			 if ($association->getEmbedded() === "always" || $association->getEmbedded() === "load") {
 				// case: hasMany + embed association

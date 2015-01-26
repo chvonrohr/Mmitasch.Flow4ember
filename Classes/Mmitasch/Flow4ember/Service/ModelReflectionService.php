@@ -74,8 +74,8 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 		}
         
 			// resource as standard metamodel (file relations can be lazy-loaded)
-		$this->setMetaModel(new Metamodel('TYPO3\Flow\Resource\Resource', $packageKey));	
-		$this->setMetaModel(new Metamodel('TYPO3\Flow\Resource\ResourcePointer', $packageKey));	
+		//$this->setMetaModel(new Metamodel('TYPO3\Flow\Resource\Resource', $packageKey));	
+		//$this->setMetaModel(new Metamodel('TYPO3\Flow\Resource\ResourcePointer', $packageKey));	
 		//$this->metaModels[$packageKey][$flowModelName]
 		
 		
@@ -85,7 +85,11 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 				if (is_array($metaModel->getAssociations())) {
 					foreach ($metaModel->getAssociations() as $association) {
 						$targetFlowModelName = $association->getFlowModelName();
-						if (stristr($targetFlowModelName, 'TYPO3\Flow\Resource')) continue;
+
+						if (stristr($targetFlowModelName, 'TYPO3\Flow\Resource') || stristr($targetFlowModelName, 'TYPO3\Media')){
+							continue;
+						}
+						
 						$targetMetaModel = $this->findByFlowModelName($targetFlowModelName, $packageKey);
 						$association->setMetaModel($targetMetaModel);
 					}
