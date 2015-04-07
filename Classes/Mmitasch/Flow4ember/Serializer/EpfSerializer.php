@@ -67,13 +67,18 @@ class EpfSerializer implements SerializerInterface {
 	 * @param array $resultMeta
 	 * @return type
 	 */
-	public function serialize ($objects, $isCollection, $clientId, $resultMeta = array(), $options = array()) {
+	public function serialize ($objects, $isCollection, $clientId = NULL, $resultMeta = array(), $options = array()) {
 		$result = array();
 
 		// meta: http://emberjs.com/guides/models/handling-metadata/
 		$result['meta'] = $resultMeta;
 
+
 		if (empty($objects)) {
+			if (!array_key_exists('model', $options)) {
+				return '';
+			}
+			
 			$result[ $options['model'] ] = array();
 			return json_encode((object) $result);
 		}
@@ -99,12 +104,15 @@ class EpfSerializer implements SerializerInterface {
 		if (!array_key_exists('sideload', $options)) {
 			$options['sideload'] = array();
 		}
-
+		//\TYPO3\Flow\var_dump($options['sideload'], 'sideload option');
+		//\TYPO3\Flow\var_dump($this->sideloadObjects, 'sideload');
+		
 		if (!empty($this->sideloadObjects)) {
 			foreach ($this->sideloadObjects as $flowModelName => $objects) {
 
 				// check if option set in sideload-request !
 				$modelShortName = lcfirst( substr($flowModelName, strrpos($flowModelName, '\\')+1) );
+				
 				if ($options['sideload'] == 'all' || in_array($modelShortName, $options['sideload'])) {
 					$associationMetaModel = $this->findByFlowModelName($flowModelName);
 					$associationResourceName = $associationMetaModel->getResourceName();
@@ -181,14 +189,21 @@ class EpfSerializer implements SerializerInterface {
 		
 			// add associations
 		foreach ((array) $metaModel->getAssociations() as $association) {
-			$getterName = 'get' . ucfirst($association->getFlowName());
+			$flowName = $association->getFlowName();
+			$getterName = 'get' . ucfirst($flowName);
 			$associatedObjects = $object->$getterName();
-			
+
+			//\TYPO3\Flow\var_dump( $associatedObjects, $association->getFlowName());
+
 				// only include in result if contains an object
 			if (isset($associatedObjects) && !empty($associatedObjects)) {
 					// define name of association property
 				$name = $this->getPayloadName($association->getEmberName(), $association->getEmberType()); 
 				$result[$name] = $this->serializeAssociation($associatedObjects, $association); 
+			} else {
+				// show as null (not set!)
+				$result[$flowName] = NULL; // TODO: maybe use "getPayloadName"
+				//\TYPO3\Flow\var_dump( $flowName,  'no object');
 			}
 		}
 		
@@ -208,7 +223,7 @@ class EpfSerializer implements SerializerInterface {
 
 
 		// resource+special
-		if (stristr($associationFlowModelName, 'TYPO3\\Media')) {
+		if (stristr($associationFlowModelName, 'TYPO3\\Media') || stristr($associationFlowModelName, 'TYPO3\Flow\Security')) {
 			return $this->persistenceManager->getIdentifierByObject($objects);
 		}
 
@@ -265,31 +280,22 @@ class EpfSerializer implements SerializerInterface {
 		// Add properties
 		foreach ((array) $metaModel->getProperties() as $property) {
 			$propertyPayloadName = $this->getPayloadName($property->getName());
-			//\TYPO3\Flow\var_dump($propertyPayloadName);
-			//\TYPO3\Flow\var_dump($data);
+
 			if (array_key_exists($propertyPayloadName, $data)) {
 				$convertTo = $property->getConverter()->getTo();
 				$result[$property->getName()] = $convertTo($data[$propertyPayloadName]);
-				// TODO cleanup
-				if ($property->getName() == 'birthday') {
-					//\TYPO3\Flow\var_dump($property, "property");
-					//\TYPO3\Flow\var_dump(get_class($property), 'type property');
-					//\TYPO3\Flow\var_dump($property->getConverter(), 'type converter');
-					//\TYPO3\Flow\var_dump($result[$property->getName()], 'result');
-				}
 			}
 		}
 		
 		// Add associations
 		foreach ((array) $metaModel->getAssociations() as $association) {
 			$associationPayloadName = $this->getPayloadName($association->getEmberName(), $association->getEmberType());
-			//$this->systemLogger->log("Association: " . $association->getEmberName() . "; PayloadName: " . $associationPayloadName . "; Type: " . $association->getEmberType(), LOG_INFO);
-			//$this->systemLogger->log("Payload name: " . $associationPayloadName, LOG_INFO); // TODO remove
 			
 			if(isset($data[$associationPayloadName]) && $data[$associationPayloadName] !== NULL) {
 				$result[$association->getFlowName()] = $data[$associationPayloadName];
 			}
 		}
+		
 		/*
 		// TODO remove Logging
 		ob_start();
@@ -340,6 +346,8 @@ class EpfSerializer implements SerializerInterface {
 	 * @return \Mmitasch\Flow4ember\Domain\Model\Metamodel
 	 */
 	protected function findByFlowModelName($flowModelName) {
+		$flowModelName = preg_replace('/^TYPO3\\\Flow\\\Persistence\\\Doctrine\\\Proxies\\\__CG__\\\/', '', $flowModelName);
+		//$flowModelName = str_replace("TYPO3\\\Flow\\\Persistence\\\Doctrine\\\Proxies\\\__CG__\\\", "", $flowModelName) ;
 		if (!isset($this->metaModels[$flowModelName])) {
 			throw new \RuntimeException('Could not find Metamodel for class: ' . $flowModelName . '.', 1375148357); 
 		}

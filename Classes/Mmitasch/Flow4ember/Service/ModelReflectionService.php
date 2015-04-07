@@ -86,7 +86,11 @@ class ModelReflectionService implements ModelReflectionServiceInterface {
 					foreach ($metaModel->getAssociations() as $association) {
 						$targetFlowModelName = $association->getFlowModelName();
 
-						if (stristr($targetFlowModelName, 'TYPO3\Flow\Resource') || stristr($targetFlowModelName, 'TYPO3\Media')){
+						// ignore models
+						if (stristr($targetFlowModelName, 'TYPO3\Flow\Resource') 
+							|| stristr($targetFlowModelName, 'TYPO3\Media')
+							|| stristr($targetFlowModelName, 'TYPO3\Party')
+							|| stristr($targetFlowModelName, 'TYPO3\Flow\Security') ) {
 							continue;
 						}
 						

@@ -166,6 +166,7 @@ class Metamodel {
 	}
 	
 	public function getModelNameLowercased() {
+		return lcfirst($this->modelName);
 		return strtolower($this->modelName);
 	}
 
@@ -264,13 +265,16 @@ class Metamodel {
                         $this->reflectionService->_activateDependency();
         }
 		
-		foreach ($this->reflectionService->getClassPropertyNames($this->flowName) as $propertyName) {
+		$emberProperties = $this->reflectionService->getPropertyNamesByAnnotation($this->flowName, 'Mmitasch\Flow4ember\Annotations\Attribute');
+		
+		foreach ($emberProperties as $propertyName) {
+
 			$varType = $this->reflectionService->getPropertyTagValues($this->flowName, $propertyName, 'var');
 			$flowType = \TYPO3\Flow\Utility\TypeHandling::parseType($varType[0]);
 			$flowModelName = \TYPO3\Flow\Utility\TypeHandling::isCollectionType($flowType['type']) ? $flowType['elementType'] : $flowType['type'];
 
 			// TODO: lookup ember type config from Ember.yaml
-			$emberType = $this->reflectionService->getPropertyAnnotation($this->flowName, $propertyName, '\Mmitasch\Flow4ember\Annotations\Type');
+			$emberType = $this->reflectionService->getPropertyAnnotation($this->flowName, $propertyName, 'Mmitasch\Flow4ember\Annotations\Type');
 
 			// TODO: handle abstract classes and interfaces
 			
