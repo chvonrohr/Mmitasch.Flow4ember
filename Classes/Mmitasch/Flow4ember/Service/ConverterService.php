@@ -56,6 +56,7 @@ class ConverterService {
 		$this->standardConverters['date'] = new TypeConverter('DateTime', 'date', 
 				function ($value) { 
 					if (!$value || empty($value)) return NULL;
+					//$value->setTimezone( new \DateTimeZone("UTC") );
 					return $value->format(\DateTime::ISO8601); /* ISO8601 is the preferred format for serializing date in json*/}, 
 				function($value) { 
 					if (!$value) return NULL;
