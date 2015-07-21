@@ -338,9 +338,6 @@ class EpfRestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 			// https://blog.apigee.com/detail/restful_api_design_can_your_api_give_developers_just_the_information
 			$modelsQuery = $this->metaModel->getRepository()->findAll()->getQuery();
 			
-			// TODO: filter ???
-			// xxx=aldkfjdfkdf
-
 			// after filtering, count all objects before limiting query
 			$meta['total'] = $modelsQuery->count();
 
@@ -375,8 +372,8 @@ class EpfRestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 
 		}
 		
-		$x=\TYPO3\Flow\var_dump($models, '', TRUE, TRUE);
-		$this->systemLogger->log("Models in List Action: " . $x, LOG_INFO); // TODO remove
+		//$x=\TYPO3\Flow\var_dump($models, '', TRUE, TRUE);
+		//$this->systemLogger->log("Models in List Action: " . $x, LOG_INFO); // TODO remove
 		
 		$this->view->assign('content', $models);
 		$this->view->assign('isCollection', TRUE);
@@ -398,14 +395,26 @@ class EpfRestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @param object $model The new model to add
 	 * @param string $clientId The clientId passed from ember persistance layer
 	 * @return void
+	 * @Flow\IgnoreValidation("$model")
 	 */
-	public function createAction($model, $clientId = NULL) {
-		$this->metaModel->getRepository()->add($model);
-		$this->persistenceManager->persistAll(); 
+	public function createAction($model) {
 		
-		$this->response->setStatus(201);
+		//validate
+		$errors = $this->getValidationErrors($model);
+		
+		// dont save - send errors
+		if ($errors) {
+			$this->response->setStatus(422); // 422 Unprocessable Entity
+			$this->view->assign('errors', $errors);
+		}
+		// ok: save and respond
+		else {
+			$this->metaModel->getRepository()->add($model);
+			$this->persistenceManager->persistAll(); 
+			$this->response->setStatus(201);
+		}
+
 		$this->view->assign('content', $model);
-		$this->view->assign('clientId', $clientId);
 	}
 
 	/**

@@ -71,7 +71,9 @@ class EpfSerializer implements SerializerInterface {
 		$result = array();
 
 		// meta: http://emberjs.com/guides/models/handling-metadata/
-		$result['meta'] = $resultMeta;
+		if ($resultMeta && count($resultMeta) > 0) {
+			$result['meta'] = $resultMeta;
+		}
 
 
 		if (empty($objects)) {
@@ -94,10 +96,10 @@ class EpfSerializer implements SerializerInterface {
 		} else {
 			$resourceNameSingular = $metaModel->getResourceNameSingular();
 			$result[$resourceNameSingular] = $this->serializeObject($objects, $metaModel);
-			
+			/*
 			if (isset($clientId)) {
 				$result[$resourceNameSingular]['client_id'] = $clientId;
-			}
+			}*/
 		}
 
 		// sideload options
